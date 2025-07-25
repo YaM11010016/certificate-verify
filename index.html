@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>证书真伪验证</title>
+</head>
+<body>
+  <h2>证书验证结果</h2>
+  <div id="result">正在查询，请稍候...</div>
+
+<script>
+  // 从网址参数中取证书编号
+  function getQueryParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+  }
+
+  const certid = getQueryParam('certid');
+
+  // 把下面这行的YOUR_API_ID替换成你从SheetDB获得的API ID
+  const apiUrl = 'https://sheetdb.io/api/v1/tl917b0ugrvwr/certid/' + certid;
+
+  if (!certid) {
+    document.getElementById('result').innerText = '请通过二维码扫描含证书编号的链接访问本页';
+  } else {
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.length === 0) {
+          document.getElementById('result').innerText = '证书不存在或无效';
+          return;
+        }
+        const cert = data[0];
+        document.getElementById('result').innerHTML = `
+          <p>姓名：${cert.name}</p>
+          <p>颁发日期：${cert.issuedate}</p>
+          <p>状态：${cert.status}</p>
+        `;
+      })
+      .catch(err => {
+        console.error(err);
+        document.getElementById('result').innerText = '查询失败，请稍后重试';
+      });
+  }
+</script>
+</body>
+</html>
